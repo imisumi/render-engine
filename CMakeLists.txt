@@ -9,10 +9,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # add_executable(${PROJECT_NAME} src/main.cpp)
 # file(GLOB SRC_FILES "src/*.cpp")
 file(GLOB_RECURSE SOURCES "src/*.cpp")
-# file(GLOB_RECURSE SOURCES "src/*.h")
+file(GLOB_RECURSE HEADERS "include/*.h")
 
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
+# Include directories containing header files
+target_include_directories(${PROJECT_NAME} PRIVATE include)
+target_include_directories(${PROJECT_NAME} PRIVATE dep/stb)
 # Add your executable
-add_executable(${PROJECT_NAME} ${SOURCES})
+# add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Include Glad
 target_sources(${PROJECT_NAME} PRIVATE dep/glad/src/glad.c)
@@ -90,3 +95,14 @@ target_link_libraries(${PROJECT_NAME} PRIVATE imgui)
 # target_include_directories("ImGui" PUBLIC ${IMGUI_PATH})
 
 # target_link_libraries(${PROJECT_NAME} PUBLIC ImGui)
+
+
+
+# Set OpenGL_GL_PREFERENCE to use GLVND
+set(OpenGL_GL_PREFERENCE "GLVND")
+
+# Find OpenGL package
+find_package(OpenGL REQUIRED)
+
+# Link OpenGL library to your target
+target_link_libraries(YourProjectName PRIVATE OpenGL::GL)

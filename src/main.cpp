@@ -89,19 +89,59 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
-#define GL_SILENCE_DEPRECATION
+// #define GL_SILENCE_DEPRECATION
 
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
 // Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
-#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
-#pragma comment(lib, "legacy_stdio_definitions")
-#endif
+// #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+// #pragma comment(lib, "legacy_stdio_definitions")
+// #endif
 
 // #include "Application.h"
 
+#include <iostream>
+#include "App.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+
+bool LoadTextureFromFile(const char* filename, GLuint* out_texture, int* out_width, int* out_height)
+{
+    // Load from file
+    int image_width = 0;
+    int image_height = 0;
+    unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
+    if (image_data == NULL)
+        return false;
+
+    // Create a OpenGL texture identifier
+    GLuint image_texture;
+    glGenTextures(1, &image_texture);
+    glBindTexture(GL_TEXTURE_2D, image_texture);
+
+    // Setup filtering parameters for display
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+
+    // Upload pixels into texture
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+    stbi_image_free(image_data);
+
+    *out_texture = image_texture;
+    *out_width = image_width;
+    *out_height = image_height;
+
+    return true;
+}
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -117,13 +157,15 @@ int main(int, char**)
 
 	// GL 3.0 + GLSL 130
 	const char* glsl_version = "#version 130";
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);			// 3.0+ only
+	// glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	// glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);	// 3.2+ only
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);				// 3.0+ only
 
 	// Create window with graphics context
-	GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(1600, 1200, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
 	if (window == nullptr)
 		return 1;
 	glfwMakeContextCurrent(window);
@@ -162,6 +204,17 @@ int main(int, char**)
 	bool show_another_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+	// glfw disable vsync
+	glfwSwapInterval(0);
+
+
+
+	int my_image_width = 0;
+	int my_image_height = 0;
+	GLuint my_image_texture = 0;
+	bool ret = LoadTextureFromFile("/home/imisumi/Desktop/render-engine/uv.png", &my_image_texture, &my_image_width, &my_image_height);
+	IM_ASSERT(ret);
+
 	// Main loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -173,10 +226,160 @@ int main(int, char**)
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		// if (show_demo_window)
+		// 	ImGui::ShowDemoWindow(&show_demo_window);
+
 		//? My code goes here
-		ImGui::Begin("Settings");
-		ImGui::Button("Hello");
+		// ImGui::Begin("Settings");
+		// ImGui::Button("Hello");
+		// ImGui::End();
+
+
+		App::RenderUI();
+
+		ImGui::Begin("fps");
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 		ImGui::End();
+
+
+		// ImGui::Begin("OpenGL Texture Text");
+		// ImGui::Begin("OpenGL Texture Text", nullptr, ImGuiWindowFlags_NoScrollbar);
+
+
+		// ImGui::Begin("OpenGL Texture Text", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		// // ImGui::Text("pointer = %p", my_image_texture);
+		// static ImVec2 imagePosition(0.0f, 0.0f);
+		// ImGui::Text("position = %f, %f", imagePosition.x, imagePosition.y);
+
+		// if (ImGui::IsMouseDragging(ImGuiMouseButton_Right))
+		// {
+		// 	// If right mouse button is being dragged, update the image position
+		// 	ImVec2 mouseDelta = ImGui::GetIO().MouseDelta;
+		// 	imagePosition.x += mouseDelta.x;
+		// 	imagePosition.y += mouseDelta.y;
+		// }
+
+		// // Draw the image with updated position
+		// ImGui::SetCursorPos(imagePosition);
+
+		// ImVec2 imageSize(my_image_width, my_image_height);
+		// ImGui::Image((void*)(intptr_t)my_image_texture, imageSize);
+
+		// ImGui::End();
+
+
+
+		// ImGui::Begin("OpenGL Texture Text", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		// ImVec2 windowSize = ImGui::GetWindowSize();
+		// ImGui::Text("Window Size: %.0f x %.0f", windowSize.x, windowSize.y);
+
+		// static float scale = 1.0f; // Initial scale factor
+		// // Adjust scale factor based on mouse scroll
+		// scale += ImGui::GetIO().MouseWheel * 0.1f;
+
+		// ImVec2 imageSize(my_image_width * scale, my_image_height * scale);
+
+		// // static ImVec2 imageOrigin(windowSize.x / 2.0f, windowSize.y / 2.0f); // Set origin to center of window
+		// static ImVec2 imageOrigin(100, 100); // Set origin to top-left of window
+
+		// // Calculate image position to scale around imageOrigin
+		// ImVec2 imagePosition = ImVec2(imageSize.x / 2.0f, imageSize.y / 2.0f);
+		// imagePosition.x = imageOrigin.x - imagePosition.x;
+		// imagePosition.y = imageOrigin.y - imagePosition.y;
+		// // ImVec2 imagePosition = imageOrigin - ImVec2(imageSize.x / 2.0f, imageSize.y / 2.0f);
+
+		// if (ImGui::IsMouseDragging(ImGuiMouseButton_Right))
+		// {
+		// 	ImVec2 mouseDelta = ImGui::GetIO().MouseDelta;
+		// 	imageOrigin.x += mouseDelta.x;
+		// 	imageOrigin.y += mouseDelta.y;
+		// }
+
+		// ImGui::SetCursorPos(imagePosition);
+		// ImGui::Image((void*)(intptr_t)my_image_texture, imageSize);
+
+		// ImGui::End();
+
+
+
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f)); // Set window background color
+		ImGui::Begin("OpenGL Texture Text", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		ImVec2 windowSize = ImGui::GetWindowSize();
+		ImGui::Text("Window Size: %.0f x %.0f", windowSize.x, windowSize.y);
+		// ImVec2 mousePos = ImGui::GetMousePos(); // Get mouse position
+		// ImVec2 windowPos = ImGui::GetWindowPos(); // Get window position
+
+		// bool isMouseInsideWindow = mousePos.x >= windowPos.x && mousePos.x <= windowPos.x + windowSize.x &&
+		// 							mousePos.y >= windowPos.y && mousePos.y <= windowPos.y + windowSize.y;
+
+
+		static float scale = 1.0f; // Initial scale factor
+		static ImVec2 imageOffset(0, 0); // Center image position
+		ImGui::Text("scale = %f", scale);
+
+		scale += ImGui::GetIO().MouseWheel * 0.1f;
+
+		ImVec2 imageSize(my_image_width * scale, my_image_height * scale);
+
+		ImVec2 imageOrigin(windowSize.x / 2.0f, windowSize.y / 2.0f); // Set origin to center of window
+
+		ImVec2 imagePosition = ImVec2(imageSize.x / 2.0f, imageSize.y / 2.0f);
+		imagePosition.x = imageOrigin.x - imagePosition.x;
+		imagePosition.y = imageOrigin.y - imagePosition.y;
+
+		if (ImGui::IsMouseDragging(ImGuiMouseButton_Right))
+		{
+			ImVec2 mouseDelta = ImGui::GetIO().MouseDelta;
+			imageOffset.x += mouseDelta.x;
+			imageOffset.y += mouseDelta.y;
+		}
+
+		imagePosition.x += imageOffset.x;
+		imagePosition.y += imageOffset.y;
+		ImGui::SetCursorPos(imagePosition);
+		ImGui::Image((void*)(intptr_t)my_image_texture, imageSize);
+		ImGui::End();
+		ImGui::PopStyleColor();
+
+
+
+
+		// ImGui::Begin("OpenGL Texture Text", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		// // static ImVec2 imagePosition(0.0f, 0.0f);
+		// ImVec2 windowSize = ImGui::GetWindowSize();
+		// ImGui::Text("Window Size: %.0f x %.0f", windowSize.x, windowSize.y);
+
+
+		// static float scale = 1.0f; // Initial scale factor
+		// // Adjust scale factor based on mouse scroll
+		// scale += ImGui::GetIO().MouseWheel * 0.1f;
+
+		// ImVec2 imageSize(my_image_width * scale, my_image_height * scale);
+
+		// // static ImVec2 imagePosition(imageSize.x / -2.0f, imageSize.y / -2.0f); // Center image position
+		// static ImVec2 imagePosition(0, 0); // Center image position
+
+		// ImGui::Text("position = %f, %f", imagePosition.x, imagePosition.y);
+
+
+		// if (ImGui::IsMouseDragging(ImGuiMouseButton_Right))
+		// {
+		// 	ImVec2 mouseDelta = ImGui::GetIO().MouseDelta;
+		// 	imagePosition.x += mouseDelta.x;
+		// 	imagePosition.y += mouseDelta.y;
+		// }
+
+
+
+		// ImGui::SetCursorPos(imagePosition);
+		// ImGui::Image((void*)(intptr_t)my_image_texture, imageSize);
+
+		// ImGui::End();
+
+
+
+	
+
 
 		// Rendering
 		ImGui::Render();
