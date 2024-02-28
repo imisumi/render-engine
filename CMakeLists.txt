@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(YourProjectName)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+
+
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -16,6 +19,7 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 # Include directories containing header files
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_include_directories(${PROJECT_NAME} PRIVATE dep/stb)
+target_include_directories(${PROJECT_NAME} PRIVATE dep/glm)
 # Add your executable
 # add_executable(${PROJECT_NAME} ${SOURCES})
 
