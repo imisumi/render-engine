@@ -38,7 +38,7 @@ private:
 
 private:
 	GLFWwindow* m_WindowHandle = nullptr;
-	int	m_Width = 1600;
+	int	m_Width = 1200;
 	int	m_Height = 1200;
 
 	float m_TimeStep = 0.0f;
@@ -51,6 +51,7 @@ private:
 	// std::vector<Scene*> m_Scenes{0};
 	Scene* m_Scene = nullptr;
 
+	Shader m_Shader;
 
 	//temp
 	GLuint m_Program;
@@ -65,7 +66,6 @@ private:
 	GLuint m_Texture1;
 	GLuint m_Texture2;
 
-	TriangleMesh* m_Triangle = nullptr;
 	Material* m_Material = nullptr;
 
 	glm::vec3 m_QuadPos;

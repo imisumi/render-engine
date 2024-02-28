@@ -8,7 +8,7 @@ static void glfw_error_callback(int error, const char* description)
 	fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-namespace Shader
+namespace ShaderTemp
 {
 GLuint	makeModule(const std::string& path, GLenum type)
 {
@@ -148,42 +148,115 @@ void App::Init()
 
 
 
-	// //temp
-	m_Program = Shader::makeProgram("../../shaders/default.vert", "../../shaders/default.frag");
-
-	m_Triangle = new TriangleMesh();
-	m_Material = new Material("../../uv.png");
-
-	glUseProgram(m_Program);
-	glUniform1i(glGetUniformLocation(m_Program, "material"), 0);
-
-	// aplha blending
-	// glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
-	m_Scene->m_Camera.SetPosition(glm::vec3(-5.0f, 0.0f, 3.0f));
-	m_Scene->m_Camera.SetDirection(glm::vec3(1.0f, 0.0f, 0.0f));
-	m_Scene->m_Camera.setUpDirection(glm::vec3(0.0f, 0.0f, 1.0f));
+
+	// Vertices coordinates
+	GLfloat vertices[] =
+	{ //     COORDINATES     /        COLORS      /   TexCoord  //
+		-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+		-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+		0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+		0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+		0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
+	};
+
+	// Indices for vertices order
+	GLuint indices[] =
+	{
+		0, 1, 2,
+		0, 2, 3,
+		0, 1, 4,
+		1, 2, 4,
+		2, 3, 4,
+		3, 0, 4
+	};
+
+	// Create a shader program
+	m_Shader = Shader("../../shaders/default.vert", "../../shaders/default.frag");
+
+	// Generates Vertex Array Object and binds it
+	VAO VAO1;
+	VAO1.Bind();
+
+	// Generates Vertex Buffer Object and links it to vertices
+	VBO VBO1(vertices, sizeof(vertices));
+	// Generates Element Buffer Object and links it to indices
+	EBO EBO1(indices, sizeof(indices));
+
+	// Links VBO attributes such as coordinates and colors to VAO
+	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	// Unbind all to prevent accidentally modifying them
+	VAO1.Unbind();
+	VBO1.Unbind();
+	EBO1.Unbind();
+
+	// Gets ID of uniform called "scale"
+	GLuint uniID = glGetUniformLocation(m_Shader.ID, "scale");
 
 
-	glm::vec3 quadPos = glm::vec3(-0.2f, 0.4f, 0.0f);
 
-	// GLuint modelLoc = glGetUniformLocation(m_Program, "model");
-	m_ModelLoc = glGetUniformLocation(m_Program, "model");
-	GLuint viewLoc = glGetUniformLocation(m_Program, "view");
-	GLuint projLoc = glGetUniformLocation(m_Program, "projection");
+	Texture img("../../uv.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+	img.texUnit(m_Shader, "tex", 0);
 
-	// glm::mat4 view = glm::lookAt(m_Scene->m_Camera.getPosition(), m_Scene->m_Camera.getDirection(), m_Scene->m_Camera.getUpDirection());
-	// m_Scene->m_Camera.setView(view);
-	m_Scene->m_Camera.RecalculateView();
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(m_Scene->m_Camera.GetView()));
 
-	glm::mat4 proj = glm::perspective(
-			glm::radians(45.0f), 
-			(float)m_Width / (float)m_Height, 0.1f, 1000.0f);
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+
+	// Variables that help the rotation of the pyramid
+	float rotation = 0.0f;
+	double prevTime = glfwGetTime();
+
+	// Enables the Depth Buffer
+	glEnable(GL_DEPTH_TEST);
+
+	// Main while loop
+	while (!glfwWindowShouldClose(m_WindowHandle))
+	{
+		// Specify the color of the background
+		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		// Clean the back buffer and assign the new color to it
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Tell OpenGL which Shader Program we want to use
+		m_Shader.Activate();
+
+		// Simple timer
+		double crntTime = glfwGetTime();
+		if (crntTime - prevTime >= 1 / 60)
+		{
+			rotation += 0.5f;
+			prevTime = crntTime;
+		}
+
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 projection = glm::mat4(1.0f);
+
+		model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+		view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
+		projection = glm::perspective(glm::radians(45.0f), (float)m_Width / (float)m_Height, 0.1f, 100.0f);
+
+		int modelLoc = glGetUniformLocation(m_Shader.ID, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		int viewLoc = glGetUniformLocation(m_Shader.ID, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		int projLoc = glGetUniformLocation(m_Shader.ID, "projection");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+
+		// Assigns a value to the uniform; NOTE: Must always be done after activating the Shader Program
+		glUniform1f(uniID, 0.5f);
+		// Binds texture so that is appears in rendering
+		img.Bind();
+		// Bind the VAO so OpenGL knows to use it
+		VAO1.Bind();
+		// Draw primitives, number of indices, datatype of indices, index of indices
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
+		// Swap the back buffer with the front buffer
+		glfwSwapBuffers(m_WindowHandle);
+		// Take care of all GLFW events
+		glfwPollEvents();
+	}
 }
 
 void	App::OnInput()
@@ -206,49 +279,7 @@ void App::Shutdown()
 
 void App::Run()
 {
-	glm::vec3 quadPos = glm::vec3(-0.2f, 0.4f, 0.0f);
-	int width, height;
-	while (!glfwWindowShouldClose(m_WindowHandle))
-	{
-		glfwPollEvents();
-		//resize
-		glfwGetFramebufferSize(m_WindowHandle, &width, &height);
-		if (width != m_Width || height != m_Height)
-		{
-			glViewport(0, 0, width, height);
-			m_Width = width;
-			m_Height = height;
-		}
-		if (glfwGetKey(m_WindowHandle, GLFW_KEY_W) == GLFW_PRESS)
-		{
-			std::cout << "W" << std::endl;
-		}
 
-
-
-
-
-
-
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, quadPos);
-		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-		glUniformMatrix4fv(m_ModelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-
-
-
-
-
-
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glUseProgram(m_Program);
-		m_Material->use(0);
-		m_Triangle->draw();
-
-		glfwSwapBuffers(m_WindowHandle);
-	}
 }
 
 

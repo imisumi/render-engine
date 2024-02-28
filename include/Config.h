@@ -15,7 +15,17 @@
 #include <fstream>
 #include <sstream>
 
-#include "triangle_mesh.h"
 #include "Material.h"
 
 #include "Input.h"
+
+
+#include "Shader.h"
+#include "VAO.h"	// Vertex Array Object
+#include "VBO.h"	// Vertex Buffer Object
+#include "EBO.h"	// Element Buffer Object
+
+
+#include "stb_image.h"
+
+#include "Texture.h"
