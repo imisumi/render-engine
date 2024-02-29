@@ -15,17 +15,21 @@
 #include <fstream>
 #include <sstream>
 
-#include "Material.h"
+// #include "Material.h"
 
-#include "Input.h"
+// #include "Input.h"
 
 
 #include "Shader.h"
-#include "VAO.h"	// Vertex Array Object
-#include "VBO.h"	// Vertex Buffer Object
-#include "EBO.h"	// Element Buffer Object
+// #include "VAO.h"	// Vertex Array Object
+// #include "VBO.h"	// Vertex Buffer Object
+// #include "EBO.h"	// Element Buffer Object
 
 
-#include "stb_image.h"
+// #include "stb_image.h"
 
-#include "Texture.h"
+// #include "Texture.h"
+
+
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
