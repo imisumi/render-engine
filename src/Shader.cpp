@@ -102,6 +102,12 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	m_RendererID = CreateShader(vertexPath, fragmentPath);
 }
 
+Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
+	: m_VertexPath(vertexPath), m_FragmentPath(fragmentPath), m_RendererID(0)
+{
+	m_RendererID = CreateShader(vertexPath, fragmentPath);
+}
+
 Shader::~Shader()
 {
 	glDeleteProgram(m_RendererID);
@@ -138,6 +144,11 @@ GLuint	Shader::CompileShader(GLuint type, const std::string& source)
 std::string	fileToString(const std::string& filename)
 {
 	std::ifstream in(filename.c_str(), std::ios::binary);
+	if (!in)
+	{
+		std::cerr << "Error: file not found" << std::endl;
+		exit(1);
+	}
 	if (in)
 	{
 		std::string contents;
@@ -196,4 +207,11 @@ void	Shader::SetUniform4f(const std::string& name, glm::vec4 vector)
 	GLint location = GetUniformLocation(name);
 	if (location != -1)
 		glUniform4f(location, vector.x, vector.y, vector.z, vector.w);
+}
+
+void	Shader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
+{
+	GLint location = GetUniformLocation(name);
+	if (location != -1) // collum major no no transpose matrix
+		glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]);
 }

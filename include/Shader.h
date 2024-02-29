@@ -35,6 +35,7 @@ public:
 	// deleete default constructor
 	Shader();
 	Shader(const char* vertexPath, const char* fragmentPath);
+	Shader(const std::string& vertexPath, const std::string& fragmentPath);
 	~Shader();
 
 	void	Bind() const;
@@ -45,6 +46,8 @@ public:
 	void	SetUniform1i(const std::string& name, int value);
 
 	void	SetUniform4f(const std::string& name, glm::vec4 vector);
+
+	void	SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
 
 
 

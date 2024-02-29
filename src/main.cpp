@@ -23,7 +23,7 @@ int main()
 
 	// glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
-	window = glfwCreateWindow(800, 600, "OpenGL", NULL, NULL);
+	window = glfwCreateWindow(1600, 1200, "OpenGL", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -42,10 +42,10 @@ int main()
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	float positions[] = {
-		-0.5f, -0.5f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 1.0f, 0.0f,
-		 0.5f,  0.5f, 1.0f, 1.0f,
-		-0.5f,  0.5f, 0.0f, 1.0f
+		100.0f, 100.0f, 0.0f, 0.0f,
+		200.0f, 100.0f, 1.0f, 0.0f,
+		200.0f, 200.0f, 1.0f, 1.0f,
+		100.0f, 200.0f, 0.0f, 1.0f
 	};
 
 	uint32_t indices[] = {
@@ -67,11 +67,31 @@ int main()
 	//automatically binds in the constructor
 	IndexBuffer ib(indices, 6);
 
-	Shader shader("../../shaders/default.vert", "../../shaders/default.frag");
+	// Windows
+	// Shader shader("../../shaders/default.vert", "../../shaders/default.frag");
+	// Linux
 
 
+
+	std::string vertexPath("../shaders/default.vert");
+	std::string fragmentPath ("../shaders/default.frag");
+	// if windows
+	#ifdef _WIN32
+		vertexPath.insert(0, "../");
+		fragmentPath.insert(0, "../");
+	#endif
+	Shader shader(vertexPath, fragmentPath);
 	shader.Bind();
+
+
+	// glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+	glm::mat4 proj = glm::ortho(0.0f, 1600.0f, 0.0f, 1200.0f, -1.0f, 1.0f);
+	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0));
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));
+
+	glm::mat4 mvp = proj * view * model;
 	
+	shader.SetUniformMat4f("u_MVP", proj);
 
 	float r = 0.0f;
 	float increment = 0.05f;
@@ -80,7 +100,10 @@ int main()
 	// glDebugMessageCallback(errorOccurredGL, NULL);
 
 
-	Texture texture("../../uv.png");
+	//Windows
+	// Texture texture("../../uv.png");
+	// Linux
+	Texture texture("../uv.png");
 	texture.Bind(0);
 	shader.SetUniform1i("u_Texture", 0);
 

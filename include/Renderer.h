@@ -8,14 +8,14 @@
 
 // #include "stb_image/stb_image.h"
 
-// #ifdef _MSC_VER
-// #define ASSERT(x) if (!(x)) __debugbreak();
-// #else
-// #define ASSERT(x) if (!(x)) __builtin_trap();
-// #endif
+#ifdef _MSC_VER
+#define ASSERT(x) if (!(x)) __debugbreak();
+#else
+#define ASSERT(x) if (!(x)) __builtin_trap();
+#endif
 
 // msvc specific
-#define ASSERT(x) if (!(x)) __debugbreak();
+// #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\
 	x;\
 	ASSERT(GLLogCall(#x, __FILE__, __LINE__));
