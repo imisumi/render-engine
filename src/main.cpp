@@ -5,7 +5,10 @@
 #include "VertexBufferLayout.h"
 #include "VertexArray.h"
 #include "VertexBufferLayout.h"
+#include "Texture.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 int main()
 {
@@ -39,10 +42,10 @@ int main()
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	float positions[] = {
-		-0.5f, -0.5f,
-		 0.5f, -0.5f,
-		 0.5f,  0.5f,
-		-0.5f,  0.5f
+		-0.5f, -0.5f, 0.0f, 0.0f,
+		 0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f,  0.5f, 1.0f, 1.0f,
+		-0.5f,  0.5f, 0.0f, 1.0f
 	};
 
 	uint32_t indices[] = {
@@ -50,15 +53,16 @@ int main()
 		2, 3, 0
 	};
 
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
 	//automatically binds in the constructor
 	VertexArray va;
-	VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+	VertexBuffer vb(positions, 4 * 4 * sizeof(float));
 	VertexBufferLayout layout;
 	layout.Push<float>(2);
+	layout.Push<float>(2);
 	va.AddBuffer(vb, layout);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 
 	//automatically binds in the constructor
 	IndexBuffer ib(indices, 6);
@@ -75,6 +79,11 @@ int main()
 	// glEnable(GL_DEBUG_OUTPUT);
 	// glDebugMessageCallback(errorOccurredGL, NULL);
 
+
+	Texture texture("../../uv.png");
+	texture.Bind(0);
+	shader.SetUniform1i("u_Texture", 0);
+
 	Renderer renderer;
 
 	//swap interval
@@ -85,8 +94,8 @@ int main()
 		
 
 		glm::vec4 color(r, 0.3f, 0.8f, 1.0f);
-		shader.Bind();
-		shader.SetUniform4f("u_Color", color);
+		// shader.Bind();
+		// shader.SetUniform4f("u_Color", color);
 
 		// va.Bind();
 		// ib.Bind();

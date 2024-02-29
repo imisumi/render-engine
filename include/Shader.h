@@ -42,7 +42,7 @@ public:
 
 
 	// Set Uniforms
-	void SetUniform1i(const std::string& name, int value);
+	void	SetUniform1i(const std::string& name, int value);
 
 	void	SetUniform4f(const std::string& name, glm::vec4 vector);
 
