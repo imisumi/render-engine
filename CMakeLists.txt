@@ -5,7 +5,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Add executable
@@ -14,7 +14,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE HEADERS "include/*.h")
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+# add src/tests/*.h && src/tests/*.cpp
+file(GLOB_RECURSE TESTS "src/tests/**/*.cpp")
+file(GLOB_RECURSE TESTS_HEADERS "src/tests/**/*.h")
+
+
+
+
+# add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${TESTS} ${TESTS_HEADERS})
+
 
 # Include directories containing header files
 target_include_directories(${PROJECT_NAME} PRIVATE include)
