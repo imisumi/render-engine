@@ -1,8 +1,12 @@
 #pragma once
 
 #include "Renderer.h"
-#include "imgui/imgui.h"
 #include "GLFW/glfw3.h"
+
+#include "imgui/imgui.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 #include <functional>
 #include <vector>
@@ -49,6 +53,7 @@ namespace tests
 	private:
 		Test*& m_CurrentTest;
 		std::vector<std::pair<std::string, std::function<Test*()>>> m_Tests;
+
 	};
 
 } // namespace Test

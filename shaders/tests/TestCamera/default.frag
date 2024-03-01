@@ -1,0 +1,17 @@
+#version 460 core
+
+layout (location = 0) out vec4 color;
+
+in vec3 v_Color;
+in vec2 v_TexCoord;
+
+// uniform vec4 u_Color;
+uniform sampler2D u_Texture;
+
+void main()
+{
+	// vec4 texColor = texture(u_Texture, v_TexCoord);
+	// // color = u_Color;
+	// color = texColor;
+	color = texture(u_Texture, v_TexCoord);
+}

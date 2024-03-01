@@ -1,13 +1,12 @@
-#include "Config.h"
+// #include "Config.h"
 
-#include "Renderer.h"
+// #include "Renderer.h"
 
 #include "VertexBufferLayout.h"
 #include "VertexArray.h"
 #include "VertexBufferLayout.h"
 #include "Texture.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 #include "imgui.h"
@@ -15,15 +14,42 @@
 #include "imgui_impl_opengl3.h"
 
 
+#include "App.h"
+
+
 #include "tests/Test.h"
 #include "tests/TestClearColor/TestClearColor.h"
 #include "tests/TestTexture2D/TestTexture2D.h"
 #include "tests/TestCamera/TestCamera.h"
 
-static GLFWwindow* window = nullptr;
+// #include "Window.h"
+
+
+// static App* s_AppInstance = nullptr;
+
+// App& GetApp()
+// {
+// 	return *s_AppInstance;
+// }
+
+// GLFWwindow* window = nullptr;
+
+// namespace WIndow
+// {
+// 	GLFWwindow& GetWindow()
+// 	{
+// 		return *window;
+// 	}
+// }
+
 
 int main()
 {
+	App app(1600, 1200, "OpenGL");
+	app.Run();
+	return 0;
+
+
 	if (!glfwInit())
 		return -1;
 
@@ -33,12 +59,16 @@ int main()
 
 	// glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
-	window = glfwCreateWindow(1600, 1200, "OpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1600, 1200, "OpenGL", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
 		return -1;
 	}
+	// s_AppInstance = new App();
+	// s_AppInstance->SetWindow(window);
+
+
 
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
@@ -56,7 +86,6 @@ int main()
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 
-	Renderer renderer;
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -71,7 +100,9 @@ int main()
 
 	tests::Test* currentTest = nullptr;
 	tests::TestMenu* testMenu = new tests::TestMenu(currentTest);
+	// testMenu->m_WindowHandle = window;
 	currentTest = testMenu;
+
 
 	testMenu->RegisterTest<tests::TestClearColor>("Clear Color");
 	testMenu->RegisterTest<tests::TestTexture2D>("Texture 2D");
@@ -83,7 +114,8 @@ int main()
 	currentTest = testMenu->FindTest("TestCamera");
 
 	
-
+	double prevFrameTime = glfwGetTime();
+	Renderer renderer;
 	//swap interval
 	while (!glfwWindowShouldClose(window))
 	{
@@ -97,11 +129,16 @@ int main()
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
+		// Calculate delta time
+		double currentTime = glfwGetTime();
+		float deltaTime = static_cast<float>(currentTime - prevFrameTime);
+		prevFrameTime = currentTime;
 //?----------------------------------------------
 //?     ImGui code
 		if (currentTest)
 		{
-			currentTest->OnUpdate(0.0f);
+			currentTest->OnUpdate(deltaTime);
 			currentTest->OnRender();
 			ImGui::Begin("Test");
 			if (currentTest != testMenu && ImGui::Button("<-"))

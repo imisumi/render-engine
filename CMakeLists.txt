@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # add_executable(${PROJECT_NAME} src/main.cpp)
 # file(GLOB SRC_FILES "src/*.cpp")
 file(GLOB_RECURSE SOURCES "src/*.cpp")
+list(APPEND SOURCES "dep/stb/stb_implementation.c")
 file(GLOB_RECURSE HEADERS "include/*.h")
 
 # add src/tests/*.h && src/tests/*.cpp
