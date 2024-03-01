@@ -18,11 +18,12 @@
 #include "tests/Test.h"
 #include "tests/TestClearColor/TestClearColor.h"
 #include "tests/TestTexture2D/TestTexture2D.h"
+#include "tests/TestCamera/TestCamera.h"
+
+static GLFWwindow* window = nullptr;
 
 int main()
 {
-	GLFWwindow* window;
-
 	if (!glfwInit())
 		return -1;
 
@@ -74,6 +75,14 @@ int main()
 
 	testMenu->RegisterTest<tests::TestClearColor>("Clear Color");
 	testMenu->RegisterTest<tests::TestTexture2D>("Texture 2D");
+	testMenu->RegisterTest<tests::TestCamera>("TestCamera");
+
+	// set default test clear color
+	// std::vector<std::pair<std::string, std::function<Test*()>>> m_Tests;
+	//find the test with the name "Clear Color" and set it as the current test
+	currentTest = testMenu->FindTest("TestCamera");
+
+	
 
 	//swap interval
 	while (!glfwWindowShouldClose(window))

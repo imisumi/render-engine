@@ -29,6 +29,16 @@ namespace tests
 
 		void OnImGuiRender() override ;
 
+		Test* FindTest(const std::string& name)
+		{
+			for (auto& test : m_Tests)
+			{
+				if (test.first == name)
+					return test.second();
+			}
+			return nullptr;
+		}
+
 		template<typename T>
 		void RegisterTest(const std::string& name)
 		{
