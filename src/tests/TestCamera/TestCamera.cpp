@@ -1,5 +1,8 @@
 #include "TestCamera.h"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 namespace tests
 {
 	TestCamera::TestCamera()
@@ -81,7 +84,8 @@ namespace tests
 
 	void TestCamera::OnUpdate(float deltaTime)
 	{
-		// m_Camera.Movement(m_WindowHandle, deltaTime);
+		m_Camera.SetDir(m_Camera.GetDir());
+		m_Camera.Movement(deltaTime);
 		m_Rotation += m_RotationSpeed * deltaTime;
 		m_Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 	}
@@ -129,5 +133,32 @@ namespace tests
 		// ImGui::Text
 		// float slider m_RotationSpeed 0 - 10
 		ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, 0.0f, 250.0f);
+
+		glm::vec3 cameraPos = m_Camera.GetPos();
+		ImGui::Text("Camera Position:");
+		ImGui::SameLine();
+		if (ImGui::InputFloat3("##CameraPos", glm::value_ptr(cameraPos), "%.2f")) {
+			// If the value has been changed in ImGui, update the camera position
+			m_Camera.SetPos(cameraPos);
+		}
+
+
+		glm::vec3 camRotation = m_Camera.GetRot();
+		ImGui::Text("Camera Rotation:");
+		ImGui::SameLine();
+		if (ImGui::InputFloat3("##camRotation", glm::value_ptr(camRotation), "%.2f")) {
+			// If the value has been changed in ImGui, update the camera position
+			m_Camera.SetRot(camRotation);
+		}
+
+		glm::vec3 camDiraction = m_Camera.GetDir();
+		ImGui::Text("Camera Direction:");
+		ImGui::SameLine();
+		if (ImGui::InputFloat3("##camDiraction", glm::value_ptr(camDiraction), "%.2f")) {
+			// If the value has been changed in ImGui, update the camera position
+			m_Camera.SetDir(camDiraction);
+		}
+		// m_Camera.SetDir(camDiraction);
+
 	}
 } // namespace test

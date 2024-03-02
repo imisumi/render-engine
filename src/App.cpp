@@ -1,8 +1,22 @@
 #include "App.h"
 
+#include "Renderer.h"
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+#include "tests/TestClearColor/TestClearColor.h"
+#include "tests/TestTexture2D/TestTexture2D.h"
+#include "tests/TestCamera/TestCamera.h"
+
+static App* s_AppInstance = nullptr;
+
 App::App(int width, int height, const char* title)
 	: m_Width(width), m_Height(height)
 {
+	s_AppInstance = this;
+
 	if (!glfwInit())
 	{
 		std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -69,6 +83,10 @@ App::~App()
 {
 }
 
+App& App::Get()
+{
+	return *s_AppInstance;
+}
 
 void App::Run()
 {

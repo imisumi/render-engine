@@ -1,5 +1,7 @@
 #include "TestTexture2D.h"
 
+// #include <GLFW/glfw3.h>
+
 namespace tests
 {
 	TestTexture2D::TestTexture2D()

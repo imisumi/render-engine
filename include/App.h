@@ -1,15 +1,7 @@
 #pragma once
 
 #include "tests/Test.h"
-#include "tests/TestClearColor/TestClearColor.h"
-#include "tests/TestTexture2D/TestTexture2D.h"
-#include "tests/TestCamera/TestCamera.h"
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-
-#include "Renderer.h"
 
 #include <iostream>
 
@@ -20,10 +12,12 @@ public:
 	App(int width, int height, const char* title);
 	~App();
 
+	static App& Get();
+
 	void Run();
 
 	void SetWindow(GLFWwindow* window) { m_WindowHandle = window; }
-	GLFWwindow* GetWindow() const { return m_WindowHandle; }
+	GLFWwindow* GetWindowHandle() const { return m_WindowHandle; }
 
 private:
 	GLFWwindow* m_WindowHandle;

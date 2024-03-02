@@ -50,6 +50,5 @@ namespace tests
 		double m_PrevTime;
 
 		Camera m_Camera;
-
 	};
 } // namespace Test

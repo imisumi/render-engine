@@ -1,5 +1,7 @@
 #include "TestClearColor.h"
 
+// #include <GLFW/glfw3.h>
+
 namespace tests
 {
 	TestClearColor::TestClearColor()
