@@ -1,7 +1,11 @@
 #include "TestCamera.h"
 
+#include "App.h"
+
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
+
+// #include "App.h"
 
 namespace tests
 {
@@ -27,7 +31,13 @@ namespace tests
 			2, 3, 4,
 			3, 0, 4
 		};
-		m_Camera = Camera(1600, 1200, glm::vec3(0.0f, 0.5f, -3.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		// int width = App::Get().GetWidth();
+		// int height = App::Get().GetHeight();
+
+		m_Width = App::Get().GetWidth();
+		m_Height = App::Get().GetHeight();
+		m_Camera = Camera(m_Width, m_Height, glm::vec3(0.0f, 0.5f, -3.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 		// m_Projection = glm::perspective(glm::radians(45.0f), 1600.0f / 1200.0f, 0.1f, 100.0f);
 		// m_Model = glm::mat4(1.0f);
@@ -69,6 +79,12 @@ namespace tests
 		m_Rotation = 0.0f;
 		m_PrevTime = 0.0;
 		m_RotationSpeed = 125.0f;
+
+		m_Camera.SetPrespective(45.0f, (float)m_Width / (float)m_Height, 0.1f, 100.0f);
+
+		// Disable window size limits to allow resizing
+		glfwSetWindowSizeLimits(App::Get().GetWindowHandle(), GLFW_DONT_CARE, GLFW_DONT_CARE, GLFW_DONT_CARE, GLFW_DONT_CARE);
+
 	}
 
 	TestCamera::~TestCamera()
@@ -82,9 +98,39 @@ namespace tests
 		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 	}
 
+	void TestCamera::OnResize()
+	{
+		GLFWwindow* window = App::Get().GetWindowHandle();
+		int width, height;
+		glfwGetWindowSize(window, &width, &height);
+		if (m_Camera.GetWidth() != width || m_Camera.GetHeight() != height)
+		{
+			m_Camera.SetWidth(width);
+			m_Camera.SetHeight(height);
+			m_Camera.SetPrespective(45.0f, (float)m_Camera.GetWidth() / (float)m_Camera.GetHeight(), 0.1f, 100.0f);
+			GLCall(glViewport(0, 0, width, height));
+		}
+	}
+
 	void TestCamera::OnUpdate(float deltaTime)
 	{
-		m_Camera.SetDir(m_Camera.GetDir());
+
+		OnResize();
+		// glfw get width and height
+		// int width, height;
+		// glfwGetWindowSize(App::Get().GetWindowHandle(), &width, &height);
+		// if (width != m_Camera.GetWidth() || height != m_Camera.GetHeight())
+		// {
+		// 	m_Camera.SetWidth(width);
+		// 	m_Camera.SetHeight(height);
+		// 	m_Camera.SetPrespective(45.0f, (float)width / (float)height, 0.1f, 100.0f);
+		// }
+
+		//on resize
+
+
+
+		// m_Camera.SetDir(m_Camera.GetDir());
 		m_Camera.Movement(deltaTime);
 		m_Rotation += m_RotationSpeed * deltaTime;
 		m_Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -95,10 +141,18 @@ namespace tests
 		GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 		GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
+
+		// glfw get width and height
+		int width, height;
+		glfwGetWindowSize(App::Get().GetWindowHandle(), &width, &height);
+		m_Camera.SetPrespective(45.0f, (float)width / (float)height, 0.1f, 100.0f);
+
+
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
 
-		m_Camera.SetPrespective(45.0f, 1600.0f / 1200.0f, 0.1f, 100.0f);
+
+		// m_Camera.SetPrespective(45.0f, 1600.0f / 1200.0f, 0.1f, 100.0f);
 
 		Renderer renderer;
 		m_Texture->Bind();
@@ -134,31 +188,33 @@ namespace tests
 		// float slider m_RotationSpeed 0 - 10
 		ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, 0.0f, 250.0f);
 
-		glm::vec3 cameraPos = m_Camera.GetPos();
+
+		// glm::vec3 camDiraction = m_Camera.GetDir();
+		// camDiraction = glm::normalize(camDiraction);
+		// ImGui::Text("Camera Direction:");
+		// ImGui::Text("X: %.2f Y: %.2f Z: %.2f", camDiraction.x, camDiraction.y, camDiraction.z);
+
+		glm::vec3 camPosition = m_Camera.GetPos();
 		ImGui::Text("Camera Position:");
 		ImGui::SameLine();
-		if (ImGui::InputFloat3("##CameraPos", glm::value_ptr(cameraPos), "%.2f")) {
-			// If the value has been changed in ImGui, update the camera position
-			m_Camera.SetPos(cameraPos);
+		if (ImGui::DragFloat3("##camPosition", glm::value_ptr(camPosition), \
+			0.01f, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), "%.2f"))
+		{
+			m_Camera.SetPos(camPosition);
 		}
 
 
 		glm::vec3 camRotation = m_Camera.GetRot();
 		ImGui::Text("Camera Rotation:");
 		ImGui::SameLine();
-		if (ImGui::InputFloat3("##camRotation", glm::value_ptr(camRotation), "%.2f")) {
-			// If the value has been changed in ImGui, update the camera position
+		if (ImGui::DragFloat3("##camRotation", glm::value_ptr(camRotation), \
+			1.0f, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), "%.2f"))
+		{
+			//TODO: Fix tils
+			camRotation.z = 0.0f;
 			m_Camera.SetRot(camRotation);
 		}
 
-		glm::vec3 camDiraction = m_Camera.GetDir();
-		ImGui::Text("Camera Direction:");
-		ImGui::SameLine();
-		if (ImGui::InputFloat3("##camDiraction", glm::value_ptr(camDiraction), "%.2f")) {
-			// If the value has been changed in ImGui, update the camera position
-			m_Camera.SetDir(camDiraction);
-		}
-		// m_Camera.SetDir(camDiraction);
 
 	}
 } // namespace test

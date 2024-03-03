@@ -31,6 +31,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_include_directories(${PROJECT_NAME} PRIVATE dep/stb)
 target_include_directories(${PROJECT_NAME} PRIVATE dep/glm)
 target_include_directories(${PROJECT_NAME} PRIVATE dep)
+target_include_directories(${PROJECT_NAME} PRIVATE src)
 # Add your executable
 # add_executable(${PROJECT_NAME} ${SOURCES})
 

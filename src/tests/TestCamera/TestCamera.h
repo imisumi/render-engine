@@ -26,6 +26,7 @@ namespace tests
 		void OnUpdate(float deltaTime) override;
 
 		void OnRender() override;
+		void OnResize();
 
 		void OnImGuiRender() override;
 
@@ -50,5 +51,8 @@ namespace tests
 		double m_PrevTime;
 
 		Camera m_Camera;
+
+		int m_Width;
+		int m_Height;
 	};
 } // namespace Test

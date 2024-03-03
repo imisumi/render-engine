@@ -13,52 +13,13 @@
 static App* s_AppInstance = nullptr;
 
 App::App(int width, int height, const char* title)
-	: m_Width(width), m_Height(height)
+	: m_Width(width), m_Height(height), m_Title(title)
 {
 	s_AppInstance = this;
 
-	if (!glfwInit())
-	{
-		std::cerr << "Failed to initialize GLFW" << std::endl;
-		return;
-	}
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	m_WindowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
-	if (!m_WindowHandle)
-	{
-		glfwTerminate();
-		std::cerr << "Failed to create window" << std::endl;
-		return;
-	}
-
-	glfwMakeContextCurrent(m_WindowHandle);
-	glfwSwapInterval(1);
-
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		std::cerr << "Failed to initialize GLAD" << std::endl;
-		return;
-	}
-
-	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
-	GLCall(glEnable(GL_BLEND));
-	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
-	//? init imgui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	// ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-
-	// Setup Platform/Renderer backends
-	ImGui_ImplGlfw_InitForOpenGL(m_WindowHandle, true);
-	ImGui_ImplOpenGL3_Init("#version 460");
-
+	InitGLFW();
+	InitGlad();
+	InitImGui();
 
 	//? setup test framework
 	m_TestMenu = new tests::TestMenu(m_CurrentTest);
@@ -77,6 +38,61 @@ App::App(int width, int height, const char* title)
 		return;
 	}
 
+}
+
+void	App::InitGLFW()
+{
+	if (!glfwInit())
+	{
+		std::cerr << "Failed to initialize GLFW" << std::endl;
+		return;
+	}
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	m_WindowHandle = glfwCreateWindow(m_Width, m_Height, m_Title, NULL, NULL);
+	if (!m_WindowHandle)
+	{
+		glfwTerminate();
+		std::cerr << "Failed to create window" << std::endl;
+		return;
+	}
+
+	glfwMakeContextCurrent(m_WindowHandle);
+	glfwSwapInterval(1);
+
+	glfwSetWindowSizeLimits(m_WindowHandle, m_Width, m_Height, m_Width, m_Height);
+}
+
+void	App::InitGlad()
+{
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cerr << "Failed to initialize GLAD" << std::endl;
+		return;
+	}
+
+	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+	GLCall(glViewport(0, 0, m_Width, m_Height));
+}
+
+void	App::InitImGui()
+{
+	//? init imgui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	// ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplGlfw_InitForOpenGL(m_WindowHandle, true);
+	ImGui_ImplOpenGL3_Init("#version 460");
 }
 
 App::~App()
@@ -121,6 +137,8 @@ void App::Run()
 				std::cout << "back" << std::endl;
 				delete m_CurrentTest;
 				m_CurrentTest = m_TestMenu;
+				GLCall(glViewport(0, 0, m_Width, m_Height));
+				glfwSetWindowSizeLimits(m_WindowHandle, m_Width, m_Height, m_Width, m_Height);
 			}
 			m_CurrentTest->OnImGuiRender();
 			ImGui::End();

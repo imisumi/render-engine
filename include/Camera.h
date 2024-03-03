@@ -23,7 +23,7 @@ public:
 
 	void	Movement(float deltaTIme);
 
-	void Matrix(float FOV, float aspectRatio, float near, float far);
+	// void Matrix(float FOV, float aspectRatio, float near, float far);
 	void SetPrespective(float FOV, float aspectRatio, float near, float far);
 
 	void RecalculateView();
@@ -34,9 +34,15 @@ public:
 	glm::vec3 GetRot() const { return m_Rotation; }
 
 	void	SetPos(glm::vec3 pos) { m_Position = pos; }
-	void	SetDir(glm::vec3 dir);
+	// void	SetDir(glm::vec3 dir);
 	void	SetUp(glm::vec3 up) { m_Up = up; }
 	void	SetRot(glm::vec3 rot);
+
+	void	SetWidth(int width) { m_Width = width; }
+	void	SetHeight(int height) { m_Height = height; }
+
+	int		GetWidth() const { return m_Width; }
+	int		GetHeight() const { return m_Height; }
 
 
 	glm::mat4 GetView() const { return m_View; }
