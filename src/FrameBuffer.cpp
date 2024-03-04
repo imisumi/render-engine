@@ -20,9 +20,12 @@ FrameBuffer::FrameBuffer(const FrameBufferSpecification& spec)
 
 FrameBuffer::~FrameBuffer()
 {
-	glDeleteFramebuffers(1, &m_RendererID);
-	glDeleteTextures(1, &m_ColorAttachment);
-	glDeleteTextures(1, &m_DepthAttachment);
+	if (m_RendererID)
+	{
+		glDeleteFramebuffers(1, &m_RendererID);
+		glDeleteTextures(1, &m_ColorAttachment);
+		glDeleteTextures(1, &m_DepthAttachment);
+	}
 }
 
 void FrameBuffer::Invalidate()
@@ -58,6 +61,8 @@ void FrameBuffer::Invalidate()
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "Framebuffer is incomplete!" << std::endl;
 
+
+	GLCall(glViewport(0, 0, m_Specification.Width, m_Specification.Height));
 	
 
 	

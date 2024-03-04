@@ -146,7 +146,7 @@ std::string	fileToString(const std::string& filename)
 	std::ifstream in(filename.c_str(), std::ios::binary);
 	if (!in)
 	{
-		std::cerr << "Error: file not found" << std::endl;
+		std::cerr << "Error: file not found" << filename << std::endl;
 		exit(1);
 	}
 	if (in)

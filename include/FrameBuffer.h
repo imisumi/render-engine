@@ -35,6 +35,8 @@ public:
 	uint32_t GetColorAttachmentRendererID() const { return m_RendererID; }
 	const FrameBufferSpecification& GetSpecification() const { return m_Specification; }
 
+	uint32_t GetDepthAttachmentRendererID() const { return m_DepthAttachment; }
+
 	uint32_t GetWidth() const { return m_Specification.Width; }
 	uint32_t GetHeight() const { return m_Specification.Height; }
 

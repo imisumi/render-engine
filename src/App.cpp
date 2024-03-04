@@ -107,7 +107,7 @@ void	App::InitImGui()
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(m_WindowHandle, true);
-	ImGui_ImplOpenGL3_Init("#version 460");
+	ImGui_ImplOpenGL3_Init("#version 450");
 }
 
 App::~App()
