@@ -44,6 +44,7 @@ namespace tests
 
 		//imgui vec2
 		ImVec2 m_ViewportSize;
+		ImVec2 m_PrevViewportSize;
 
 		bool m_ViewPortFocused = false, m_ViewPortHovered = false;
 

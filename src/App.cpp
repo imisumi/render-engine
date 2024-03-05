@@ -45,9 +45,18 @@ void	App::InitGLFW()
 		std::cerr << "Failed to initialize GLFW" << std::endl;
 		return;
 	}
+	else
+	{
+		std::cout << "GLFW initialized" << std::endl;
+	}
 
+	// glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	// glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+	// glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	// wsl2 4.2
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	m_WindowHandle = glfwCreateWindow(m_Width, m_Height, m_Title, NULL, NULL);
@@ -107,7 +116,7 @@ void	App::InitImGui()
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(m_WindowHandle, true);
-	ImGui_ImplOpenGL3_Init("#version 450");
+	ImGui_ImplOpenGL3_Init("#version 420");
 }
 
 App::~App()

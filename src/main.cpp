@@ -25,6 +25,4 @@ int main()
 	App app(1600, 1200, "OpenGL");
 
 	app.Run();
-
-	return 0;
 }

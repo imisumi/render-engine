@@ -56,7 +56,8 @@ namespace tests
 		m_ViewPortFocused = ImGui::IsWindowFocused();
 		m_ViewPortHovered = ImGui::IsWindowHovered();
 		m_ViewportSize =ImGui::GetContentRegionAvail();
-		ImGui::Image((void*)m_FrameBuffer->GetColorAttachmentRendererID(), ImVec2{ (float)m_FrameBuffer->GetWidth(), (float)m_FrameBuffer->GetHeight() });
+		ImVec2 imgSize = { (float)m_FrameBuffer->GetWidth(), (float)m_FrameBuffer->GetHeight() };
+		ImGui::Image((void*)(intptr_t)m_FrameBuffer->GetColorAttachmentRendererID(), imgSize);
 		ImGui::End();
 		ImGui::PopStyleVar();
 
@@ -73,3 +74,4 @@ namespace tests
 
 	}
 } // namespace test
+

@@ -19,6 +19,7 @@ namespace tests
 		m_FrameBuffer = std::make_unique<FrameBuffer>(spec);
 
 		m_ViewportSize = ImVec2{ 960, 540 };
+		m_PrevViewportSize = ImVec2{ 960, 540 };
 
 
 
@@ -103,15 +104,14 @@ namespace tests
 
 	void TestCamera::OnUpdate(float deltaTime)
 	{
-		m_FrameBuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-
-		if (m_Camera.GetWidth() != m_ViewportSize.x || m_Camera.GetHeight() != m_ViewportSize.y)
+		if (m_ViewportSize.x != m_PrevViewportSize.x || m_ViewportSize.y != m_PrevViewportSize.y)
 		{
-			// std::cout << "Resizing" << std::endl;
+			std::cout << "Resizing framebuffer: " << m_ViewportSize.x << ", " << m_ViewportSize.y << std::endl;
+			m_FrameBuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_Camera.SetWidth((int)m_ViewportSize.x);
 			m_Camera.SetHeight((int)m_ViewportSize.y);
 			m_Camera.SetPrespective(45.0f, (float)m_Camera.GetWidth() / (float)m_Camera.GetHeight(), 0.1f, 100.0f);
-			GLCall(glViewport(0, 0, m_Camera.GetWidth(), m_Camera.GetHeight()));
+			// GLCall(glViewport(0, 0, m_Camera.GetWidth(), m_Camera.GetHeight()));
 		}
 
 
@@ -122,9 +122,9 @@ namespace tests
 
 	void TestCamera::OnRender()
 	{
-		// GLCall(glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]));
-		// // GLCall(glClear(GL_COLOR_BUFFER_BIT));
-		// GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+		GLCall(glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]));
+		// GLCall(glClear(GL_COLOR_BUFFER_BIT));
+		GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
 
 
@@ -163,53 +163,54 @@ namespace tests
 
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		ImGui::Begin("Viewport");
-		m_ViewPortFocused = ImGui::IsWindowFocused();
-		m_ViewPortHovered = ImGui::IsWindowHovered();
-		m_ViewportSize =ImGui::GetContentRegionAvail();
-		ImGui::Image((void*)m_FrameBuffer->GetColorAttachmentRendererID(), ImVec2{ (float)m_FrameBuffer->GetWidth(), (float)m_FrameBuffer->GetHeight() }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-		// ImVec2 imageSize = ImVec2{ (float)m_FrameBuffer->GetWidth(), (float)m_FrameBuffer->GetHeight() };
-
+		if (ImGui::Begin("Viewport"))
+		{
+			m_ViewPortFocused = ImGui::IsWindowFocused();
+			m_ViewPortHovered = ImGui::IsWindowHovered();
+			m_PrevViewportSize = m_ViewportSize;
+			m_ViewportSize =ImGui::GetContentRegionAvail();
+			ImVec2 imgSize = ImVec2{ (float)m_FrameBuffer->GetWidth(), (float)m_FrameBuffer->GetHeight() };
+			// ImGui::Image((void*)m_FrameBuffer->GetColorAttachmentRendererID(), imgSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			ImGui::Image((void*)(intptr_t)m_FrameBuffer->GetColorAttachmentRendererID(), m_ViewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+		}
 		ImGui::End();
 		ImGui::PopStyleVar();
 
 
 
-		ImGui::Begin("Settings");
-		ImGui::Text("Viewport Size: %.0f x %.0f", m_ViewportSize.x, m_ViewportSize.y);
-		FrameBufferSpecification spec = m_FrameBuffer->GetSpecification();
-		ImGui::Text("FrameBuffer Size: %d  %d", spec.Width, spec.Height);
-		// focudes and hovered
-		ImGui::Text("Viewport Focused: %d", m_ViewPortFocused);
-		ImGui::Text("Viewport Hovered: %d", m_ViewPortHovered);
-		ImGui::Text("Camera dimensions: %d x %d", m_Camera.GetWidth(), m_Camera.GetHeight());
-
-
-
-		ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, 0.0f, 250.0f);
-		glm::vec3 camPosition = m_Camera.GetPos();
-		ImGui::Text("Camera Position:");
-		ImGui::SameLine();
-		if (ImGui::DragFloat3("##camPosition", glm::value_ptr(camPosition), \
-			0.01f, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), "%.2f"))
+		if (ImGui::Begin("Settings"))
 		{
-			m_Camera.SetPos(camPosition);
+			ImGui::Text("Viewport Size: %.0f x %.0f", m_ViewportSize.x, m_ViewportSize.y);
+			FrameBufferSpecification spec = m_FrameBuffer->GetSpecification();
+			ImGui::Text("FrameBuffer Size: %d  %d", spec.Width, spec.Height);
+			// focudes and hovered
+			ImGui::Text("Viewport Focused: %d", m_ViewPortFocused);
+			ImGui::Text("Viewport Hovered: %d", m_ViewPortHovered);
+			ImGui::Text("Camera dimensions: %d x %d", m_Camera.GetWidth(), m_Camera.GetHeight());
+
+			ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, 0.0f, 250.0f);
+			glm::vec3 camPosition = m_Camera.GetPos();
+			ImGui::Text("Camera Position:");
+			ImGui::SameLine();
+			if (ImGui::DragFloat3("##camPosition", glm::value_ptr(camPosition), \
+				0.01f, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), "%.2f"))
+			{
+				m_Camera.SetPos(camPosition);
+			}
+
+
+			glm::vec3 camRotation = m_Camera.GetRot();
+			ImGui::Text("Camera Rotation:");
+			ImGui::SameLine();
+			if (ImGui::DragFloat3("##camRotation", glm::value_ptr(camRotation), \
+				1.0f, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), "%.2f"))
+			{
+				//TODO: Fix tils
+				camRotation.z = 0.0f;
+				m_Camera.SetRot(camRotation);
+			}
 		}
-
-
-		glm::vec3 camRotation = m_Camera.GetRot();
-		ImGui::Text("Camera Rotation:");
-		ImGui::SameLine();
-		if (ImGui::DragFloat3("##camRotation", glm::value_ptr(camRotation), \
-			1.0f, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), "%.2f"))
-		{
-			//TODO: Fix tils
-			camRotation.z = 0.0f;
-			m_Camera.SetRot(camRotation);
-		}
-
 		ImGui::End();
-
 	}
 } // namespace test
 

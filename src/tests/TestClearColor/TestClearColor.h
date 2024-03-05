@@ -2,7 +2,7 @@
 
 #include "../Test.h"
 
-
+#include <memory>
 #include "FrameBuffer.h"
 
 namespace tests

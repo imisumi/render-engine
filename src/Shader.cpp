@@ -137,6 +137,7 @@ GLuint	Shader::CompileShader(GLuint type, const std::string& source)
 		GLchar infoLog[512];
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
 		std::cerr << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
+		exit(1);
 	}
 	return shader;
 }
